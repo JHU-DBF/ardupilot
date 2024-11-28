@@ -24,29 +24,35 @@ const AP_HAL::HAL& hal = AP_HAL::get_HAL();    //create a reference to AP_HAL::H
 
 AP_HAL::AnalogSource* chan;    //delare a pointer to AnalogSource object. AnalogSource class can be found in : AP_HAL->AnalogIn.h
 
+static int8_t pin = 15; // 8 bit integer to hold the pin number.Pin number range is [0,15]
+
 // the setup function runs once when the board powers up
 void setup(void) {
     hal.console->printf("Starting AP_HAL::AnalogIn test\r\n");    //print a starting message
     chan = hal.analogin->channel(0);    //initialization of chan variable. AnalogIn class can be found in : AP_HAL->AnalogIn.h
+
+    IGNORE_RETURN(chan->set_pin(pin));
 }
 
-static int8_t pin;    //8 bit integer to hold the pin number.Pin number range is [0,15]
 
 //the loop function runs over and over again forever
 void loop(void) {
     //get the average voltage reading
     float v  = chan->voltage_average();    //note:the voltage value is divided into 1024 segments    
     //start a new line after going through the 16 pins
-    if (pin == 0) {
-        hal.console->printf("\n");
-    }
+    // if (pin == 0) {
+        // hal.console->printf("\n");
+    // }
+
+    hal.console->printf("\n");
+
     //print the voltage value(3 decimal places) alongside the pin number 
     hal.console->printf("[%u %.3f] ",
               (unsigned)pin, (double)v);
     //increment the pin number
-    pin = (pin+1) % 16;
+    // pin = (pin+1) % 16;
     //set pin corresponding to the new pin value
-    IGNORE_RETURN(chan->set_pin(pin));
+    // IGNORE_RETURN(chan->set_pin(pin));
     //give a delay of 100ms
     hal.scheduler->delay(100);
 }
