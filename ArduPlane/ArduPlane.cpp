@@ -429,19 +429,19 @@ void Plane::twenty_hz_loop()
                 notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 12);
                 notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 15);
             } else {
+                for (uint8_t i = 0; i < gps.num_sats(); i++) {
+                    // Not ready to arm and has NO 3D fix, show GPS sats with RED
+                    notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, i);
+                    if (i == 15){
+                        break;
+                    }
+                }
                 if (gps.status() >= AP_GPS::GPS_OK_FIX_3D){
                     // If GPS has 3D fix, last LED is in BLUE
                     if (gps.num_sats() > 16){
                         notify.handle_rgb_id(0, 0, NEOPIXEL_LED_HIGH, 15);
                     } else {
                         notify.handle_rgb_id(0, 0, NEOPIXEL_LED_HIGH, gps.num_sats()-1);
-                    }
-                }
-                for (uint8_t i = 0; i < gps.num_sats(); i++) {
-                    // Not ready to arm and has NO 3D fix, show GPS sats with RED
-                    notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, i);
-                    if (i == 15){
-                        break;
                     }
                 }
             }
