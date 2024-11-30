@@ -68,4 +68,60 @@ uint16_t NeoPixel::init_ports()
     return mask;
 }
 
+void NeoPixel::rgb_set_id(uint8_t red, uint8_t green, uint8_t blue, uint8_t id)
+{
+    if (enable_mask == 0) {
+        // nothing is enabled, no pins set as LED output
+        return;
+    }
+    if (id >= pNotify->get_led_len() && id != 99) {
+        return;
+    }
+
+    AP_SerialLED *led = AP_SerialLED::get_singleton();
+    if (led == nullptr) {
+        return;
+    }
+
+    for (uint16_t chan=0; chan<16; chan++) {
+        if ((1U<<chan) & enable_mask) {
+            if (id == 99) {
+                for (uint8_t i=0; i<pNotify->get_led_len(); i++) {
+                    led->set_RGB(chan+1, i, red, green, blue);
+                }
+            } else {
+                led->set_RGB(chan+1, id, red, green, blue);
+            }
+        }
+    }
+
+    // for (uint16_t chan=0; chan<16; chan++) {
+    //     if ((1U<<chan) & enable_mask) {
+    //         led->send(chan+1);
+    //     }
+    // }
+
+    return;
+}
+
+void NeoPixel::rgb_set_id_update()
+{
+    if (enable_mask == 0) {
+        // nothing is enabled, no pins set as LED output
+        return;
+    }
+
+    AP_SerialLED *led = AP_SerialLED::get_singleton();
+    if (led == nullptr) {
+        return;
+    }
+
+    for (uint16_t chan=0; chan<16; chan++) {
+        if ((1U<<chan) & enable_mask) {
+            led->send(chan+1);
+        }
+    }
+}
+
+
 #endif  // AP_NOTIFY_NEOPIXEL_ENABLED

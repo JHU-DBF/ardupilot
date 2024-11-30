@@ -29,6 +29,7 @@ public:
     // RGB control multiple leds independently
     // give RGB value for single led
     virtual void rgb_set_id(uint8_t r, uint8_t g, uint8_t b, uint8_t id) {}
+    virtual void rgb_set_id_update() {}
 
     // this pointer is used to read the parameters relative to devices
     const AP_Notify *pNotify;

@@ -27,6 +27,8 @@ public:
     NeoPixel();
 
     uint16_t init_ports() override;
+    void rgb_set_id(uint8_t r, uint8_t g, uint8_t b, uint8_t id) override;
+    void rgb_set_id_update() override;
 };
 
 #endif  // AP_NOTIFY_NEOPIXEL_ENABLED
