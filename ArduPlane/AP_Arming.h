@@ -18,6 +18,8 @@ public:
     CLASS_NO_COPY(AP_Arming_Plane);
 
     bool pre_arm_checks(bool report) override;
+    bool pre_arm_checks_ignore_armed(bool report);
+
     bool arm_checks(AP_Arming::Method method) override;
 
     // var_info for holding Parameter information

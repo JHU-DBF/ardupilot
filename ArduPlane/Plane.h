@@ -1012,6 +1012,7 @@ private:
     void afs_fs_check(void);
 #endif
     void one_second_loop(void);
+    void twenty_hz_loop(void);
     void three_hz_loop(void);
 #if AP_AIRSPEED_AUTOCAL_ENABLE
     void airspeed_ratio_update(void);
@@ -1238,6 +1239,7 @@ public:
     bool set_land_descent_rate(float descent_rate) override;
 #endif // AP_SCRIPTING_ENABLED
 
+    int8_t installed_released_x1 = 0; // 8 = installed, 16 = released
 };
 
 extern Plane plane;

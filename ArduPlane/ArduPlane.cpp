@@ -80,7 +80,7 @@ const AP_Scheduler::Task Plane::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_ServoRelayEvents, &plane.ServoRelayEvents, update_events, 50, 150,  63),
     SCHED_TASK_CLASS(AP_BattMonitor, &plane.battery, read,   10, 300,  66),
     SCHED_TASK_CLASS(AP_Baro, &plane.barometer, accumulate,  50, 150,  69),
-    SCHED_TASK_CLASS(AP_Notify,      &plane.notify,  update, 50, 300,  72),
+    // SCHED_TASK_CLASS(AP_Notify,      &plane.notify,  update, 50, 300,  72),
     SCHED_TASK(read_rangefinder,       50,    100, 78),
 #if AP_ICENGINE_ENABLED
     SCHED_TASK_CLASS(AP_ICEngine,      &plane.g2.ice_control, update,     10, 100,  81),
@@ -89,6 +89,7 @@ const AP_Scheduler::Task Plane::scheduler_tasks[] = {
     SCHED_TASK_CLASS(AP_OpticalFlow, &plane.optflow, update,    50,    50,  87),
 #endif
     SCHED_TASK(one_second_loop,         1,    400,  90),
+    SCHED_TASK(twenty_hz_loop,         20,     50,  91),
     SCHED_TASK(three_hz_loop,           3,     75,  93),
     SCHED_TASK(check_long_failsafe,     3,    400,  96),
 #if AP_RPM_ENABLED
@@ -348,6 +349,104 @@ void Plane::one_second_loop()
     if (!is_equal(1.0f/scheduler.get_loop_rate_hz(), scheduler.get_loop_period_s()) ||
         !is_equal(G_Dt, scheduler.get_loop_period_s())) {
         INTERNAL_ERROR(AP_InternalError::error_t::flow_of_control);
+    }
+}
+
+// #define NEOPIXEL_LED_HIGH   0xFF
+#define NEOPIXEL_LED_HIGH    0x33  // NEOPIXEL_LED_LOW
+
+void Plane::twenty_hz_loop()
+{   
+    // changing modes
+    if (installed_released_x1 < 16){
+        const float v  = release_check_channel->voltage_average();
+        if (v > 1.5) {
+            if (installed_released_x1 < 8) {
+                installed_released_x1 = installed_released_x1 + 1;
+                if (installed_released_x1 == 8) {
+                    notify.handle_rgb_id(0, 0, 0, 99);
+                    notify.handle_rgb_id_update();
+                    if (plane.control_mode != &plane.mode_carried)
+                    {
+                        bool success_mode_change = plane.set_mode(plane.mode_carried, ModeReason::X1_installed);
+                        if (success_mode_change) {
+                            gcs().send_text(MAV_SEVERITY_NOTICE, "Mode changed to CARRIED");
+                        } else {
+                            gcs().send_text(MAV_SEVERITY_WARNING, "Failed to change mode to CARRIED");
+                        }
+                    }
+                    gcs().send_text(MAV_SEVERITY_NOTICE, "X1 installed");
+                }
+            }
+        } else if (v < 0.5 && v > -0.5 && installed_released_x1 >= 8 && installed_released_x1 < 16) {
+            installed_released_x1 = installed_released_x1 + 1;
+            if (installed_released_x1 == 16) {
+                for (uint8_t i = 0; i < 8; i++) {
+                    notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, i);
+                }
+                for (uint8_t i = 8; i < 16; i++) {
+                    notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, i);
+                }
+                notify.handle_rgb_id_update();
+                gcs().send_text(MAV_SEVERITY_NOTICE, "X1 released");
+            }
+        }
+    }
+    // LED notifications before the installation of X1
+    if (installed_released_x1 < 8){
+        if (arming.pre_arm_checks_ignore_armed(false)) {
+            if (gps.status() >= AP_GPS::GPS_OK_FIX_3D){
+                for (uint8_t i = 0; i < gps.num_sats(); i++) {
+                    if (i == 15){
+                        break;
+                    }
+                    // If ready to arm and 3D fix, show GPS sats with BLUE
+                    notify.handle_rgb_id(0, 0, NEOPIXEL_LED_HIGH, i);
+                }
+            } else {
+                if (gps.num_sats() == 0){
+                    // If ready to arm but no 3D fix and zero GPS sats, only third LED turns GREEN
+                    notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 0);
+                    notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 3);
+                    notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 12);
+                    notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 15);
+
+                } else {
+                    for (uint8_t i = 0; i < gps.num_sats(); i++) {
+                        if (i == 15){
+                            break;
+                        }
+                        // If ready to arm but no 3D fix, show GPS sats with GREEN
+                        notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, i);
+                    }
+                }
+            }
+        } else {
+            if (gps.num_sats() == 0){
+                // Not ready to arm and NO 3D fix and zero GPS sats, only 1st and 4th LED turns RED
+                notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 0);
+                notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 3);
+                notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 12);
+                notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, 15);
+            } else {
+                if (gps.status() >= AP_GPS::GPS_OK_FIX_3D){
+                    // If GPS has 3D fix, last LED is in BLUE
+                    if (gps.num_sats() > 16){
+                        notify.handle_rgb_id(0, 0, NEOPIXEL_LED_HIGH, 15);
+                    } else {
+                        notify.handle_rgb_id(0, 0, NEOPIXEL_LED_HIGH, gps.num_sats()-1);
+                    }
+                }
+                for (uint8_t i = 0; i < gps.num_sats(); i++) {
+                    // Not ready to arm and has NO 3D fix, show GPS sats with RED
+                    notify.handle_rgb_id(NEOPIXEL_LED_HIGH, 0, 0, i);
+                    if (i == 15){
+                        break;
+                    }
+                }
+            }
+        }
+        notify.handle_rgb_id_update();
     }
 }
 

@@ -134,6 +134,16 @@ bool AP_Arming_Plane::pre_arm_checks(bool display_failure)
     return ret;
 }
 
+bool AP_Arming_Plane::pre_arm_checks_ignore_armed(bool display_failure)
+{
+    bool armed_status_tmp = armed;
+    armed = false;
+    bool ret = pre_arm_checks(false);
+    armed = armed_status_tmp;
+    return ret;
+}
+
+
 #if HAL_QUADPLANE_ENABLED
 bool AP_Arming_Plane::quadplane_checks(bool display_failure)
 {
@@ -320,7 +330,7 @@ bool AP_Arming_Plane::disarm(const AP_Arming::Method method, bool do_disarm_chec
     if (do_disarm_checks && method == AP_Arming::Method::RUDDER) {
         // option must be enabled:
         if (get_rudder_arming_type() != AP_Arming::RudderArming::ARMDISARM) {
-            gcs().send_text(MAV_SEVERITY_INFO, "Rudder disarm: disabled");
+            // gcs().send_text(MAV_SEVERITY_INFO, "Rudder disarm: disabled");
             return false;
         }
     }

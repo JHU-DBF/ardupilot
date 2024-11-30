@@ -353,6 +353,8 @@ protected:
     AP_Airspeed airspeed;
 #endif
 
+    AP_HAL::AnalogSource* release_check_channel;
+
 #if AP_AIS_ENABLED
     // Automatic Identification System - for tracking sea-going vehicles
     AP_AIS ais;

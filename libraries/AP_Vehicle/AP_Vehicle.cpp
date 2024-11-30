@@ -222,6 +222,9 @@ void AP_Vehicle::setup()
 #endif
 #endif  // AP_AIRSPEED_ENABLED
 
+    release_check_channel = hal.analogin->channel(0);
+    IGNORE_RETURN(release_check_channel->set_pin(15));
+
 #if !APM_BUILD_TYPE(APM_BUILD_Replay)
     SRV_Channels::init();
 #endif
