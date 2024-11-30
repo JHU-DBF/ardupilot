@@ -27,6 +27,7 @@ void Plane::failsafe_short_on_event(enum failsafe_state fstype, ModeReason reaso
     switch (control_mode->mode_number())
     {
     case Mode::Number::MANUAL:
+    case Mode::Number::CARRIED:
     case Mode::Number::STABILIZE:
     case Mode::Number::ACRO:
     case Mode::Number::FLY_BY_WIRE_A:
@@ -114,6 +115,7 @@ void Plane::failsafe_long_on_event(enum failsafe_state fstype, ModeReason reason
     switch (control_mode->mode_number())
     {
     case Mode::Number::MANUAL:
+    case Mode::Number::CARRIED:
     case Mode::Number::STABILIZE:
     case Mode::Number::ACRO:
     case Mode::Number::FLY_BY_WIRE_A:

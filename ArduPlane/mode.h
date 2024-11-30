@@ -53,6 +53,7 @@ public:
 #if HAL_QUADPLANE_ENABLED
         LOITER_ALT_QLAND = 25,
 #endif
+        CARRIED = 26,
     };
 
     // Constructor
@@ -786,3 +787,18 @@ protected:
 };
 
 #endif
+
+class ModeCarried : public Mode
+{
+public:
+
+    Number mode_number() const override { return Number::CARRIED; }
+    const char *name() const override { return "CARRIED"; }
+    const char *name4() const override { return "CARR"; }
+
+    // methods that affect movement of the vehicle in this mode
+    void update() override;
+
+protected:
+    bool _enter() override;
+};
