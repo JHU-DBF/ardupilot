@@ -1,22 +1,41 @@
+# JHU DBF 2025 Custom ArduPilot
+
+This custom version of ArduPilot Plane 4.4 is being developed to achieve the mission objectives for the AIAA DBF 2025 competition. 
+
+### Changes made are:
+- Added a new mode called "CARRIED" for when the X-1 is carried by the mother ship/plane.
+- Release and installation of the X-1 is monitored with the analog airspeed sensor pins.
+- Default parameters are changed for SpeedyBee F405.
+
+### Expected behaviour (Not guaranteed lol)
+- When powered up, it automatically starts in CARRIED flight mode disarmed
+- LED lights turn on indicating following meaning
+  - Ready to arm and has 3D fix, show the no of GPS sats with BLUE
+  - Ready to arm but has NO 3D fix, show the no of GPS sats with GREEN
+  - Ready to arm but has NO 3D fix with zero GPS sats, only 1st and 4th from the beginning and the end turn GREEN
+  - Not ready to arm and has NO 3D fix, show no of GPS sats with RED with the last LED light in BLUE
+  - Not ready to arm and has NO 3D fix, show no of GPS sats with RED
+  - Not ready to arm and no 3D fix with zero GPS sats, only 1st and 4th from the beginning and the end turn RED
+- Not ready to arm means there's a problem which is not about GPS. Open the Mission Planner and investigate. 
+- When the X-1 is installed on the carrier plane, ALL of the LEDs turn OFF. The flight mode changes to CARRIED (if it is not in it already) and ARMS the plane even if there are pre-arming checks that are failing.
+- When the X-1 is released, LEDs turn on with GREEN and RED and they will not turn off until the flight mode is changed to CARRIED MANUALLY (or power cycled). The flight mode is changed to AUTO and we have to hope that it will come back and land on the target.
+
+- A mission needs to be designed and pre-loaded via the Mission Planner.
+  - The mission should include a Rally Point where the plane will return to, rather than the HOME point which is where the plane was armed at.
+- If a RC controller is connected, the flight mode switch is set to AUTO, FBWA and MANUAL. The switch should be in AUTO, so if something goes wrong after the X-1 is released, the switch should be flipped to gain the control of the X-1 and hopefully the situation too. While in the AUTO mode, the sticks can be moved and that will alter the movement of the plane without disengaging the mission (aka stick mixing). All of these are disabled when RC controllers are not connected.
+
+### Components connected
+- GPS HolyBro Micro M10 in UART 3
+- Digital Airspeed Sensor Mateksys ASPD-4525 in I2C
+- LED SpeedyBee Programable 2812 Arm LEDs in series (any LED port is fine)
+- RC receiver Spektrum SRXL2 DSMX Serial Micro Receiver SPM4650 in TX1 (optional)
+- HolyBro SiK Telemetry Radio V3 in UART 4
+
+If you have any questions, ask Koji (email:dbf@koji.space)
+
+
 # ArduPilot Project
-
-<a href="https://ardupilot.org/discord"><img src="https://img.shields.io/discord/674039678562861068.svg" alt="Discord">
-
-[![Test Copter](https://github.com/ArduPilot/ardupilot/workflows/test%20copter/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_copter.yml) [![Test Plane](https://github.com/ArduPilot/ardupilot/workflows/test%20plane/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_plane.yml) [![Test Rover](https://github.com/ArduPilot/ardupilot/workflows/test%20rover/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_rover.yml) [![Test Sub](https://github.com/ArduPilot/ardupilot/workflows/test%20sub/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_sub.yml) [![Test Tracker](https://github.com/ArduPilot/ardupilot/workflows/test%20tracker/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_tracker.yml)
-
-[![Test AP_Periph](https://github.com/ArduPilot/ardupilot/workflows/test%20ap_periph/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_sitl_periph.yml) [![Test Chibios](https://github.com/ArduPilot/ardupilot/workflows/test%20chibios/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_chibios.yml) [![Test Linux SBC](https://github.com/ArduPilot/ardupilot/workflows/test%20Linux%20SBC/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_linux_sbc.yml) [![Test Replay](https://github.com/ArduPilot/ardupilot/workflows/test%20replay/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_replay.yml)
-
-[![Test Unit Tests](https://github.com/ArduPilot/ardupilot/workflows/test%20unit%20tests/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_unit_tests.yml) [![test size](https://github.com/ArduPilot/ardupilot/actions/workflows/test_size.yml/badge.svg)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_size.yml)
-
-[![Test Environment Setup](https://github.com/ArduPilot/ardupilot/actions/workflows/test_environment.yml/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_environment.yml)
-
-[![Cygwin Build](https://github.com/ArduPilot/ardupilot/actions/workflows/cygwin_build.yml/badge.svg)](https://github.com/ArduPilot/ardupilot/actions/workflows/cygwin_build.yml) [![Macos Build](https://github.com/ArduPilot/ardupilot/actions/workflows/macos_build.yml/badge.svg)](https://github.com/ArduPilot/ardupilot/actions/workflows/macos_build.yml)
-
-[![Coverity Scan Build Status](https://scan.coverity.com/projects/5331/badge.svg)](https://scan.coverity.com/projects/ardupilot-ardupilot)
-
-[![Test Coverage](https://github.com/ArduPilot/ardupilot/actions/workflows/test_coverage.yml/badge.svg?branch=master)](https://github.com/ArduPilot/ardupilot/actions/workflows/test_coverage.yml)
-
-[![Autotest Status](https://autotest.ardupilot.org/autotest-badge.svg)](https://autotest.ardupilot.org/)
+[ArduPilot Github](https://github.com/ArduPilot/ardupilot/)
 
 ArduPilot is the most advanced, full-featured, and reliable open source autopilot software available.
 It has been under development since 2010 by a diverse team of professional engineers, computer scientists, and community contributors.

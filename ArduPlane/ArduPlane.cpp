@@ -405,7 +405,7 @@ void Plane::twenty_hz_loop()
                 }
             } else {
                 if (gps.num_sats() == 0){
-                    // If ready to arm but no 3D fix and zero GPS sats, only third LED turns GREEN
+                    // If ready to arm but no 3D fix and zero GPS sats, only some LED turns GREEN
                     notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 0);
                     notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 3);
                     notify.handle_rgb_id(0, NEOPIXEL_LED_HIGH, 0, 12);
